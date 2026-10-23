@@ -12,7 +12,8 @@ namespace ConsejerosApi.Repositories
 
         public PersonaJuridicaRepository(IConfiguration configuration)
         {
-            _connectionString = configuration.GetConnectionString("DefaultConnection")!;
+            _connectionString = configuration.GetConnectionString("CadenaSql") 
+            ?? throw new ArgumentNullException("No se encontró la cadena de conexión 'CadenaSql'.");
         }
 
         private IDbConnection CreateConnection() => new SqlConnection(_connectionString);
@@ -52,7 +53,9 @@ namespace ConsejerosApi.Repositories
             parameters.Add("@NumeroDocumento", dto.NumeroDocumento);
             parameters.Add("@RazonSocial", dto.RazonSocial);
             parameters.Add("@Direccion", dto.Direccion);
-            parameters.Add("@TelefonosJson", JsonSerializer.Serialize(dto.Telefonos));
+            parameters.Add("@TelefonosJson", dto.Telefonos != null && dto.Telefonos.Count > 0 
+                ? JsonSerializer.Serialize(dto.Telefonos) 
+                : null);
             parameters.Add("@NuevoId", dbType: DbType.Int32, direction: ParameterDirection.Output);
 
             await connection.ExecuteAsync("dbo.sp_InsertarPersonaJuridica", parameters, commandType: CommandType.StoredProcedure);
@@ -62,30 +65,32 @@ namespace ConsejerosApi.Repositories
         public async Task<bool> ActualizarAsync(int id, PersonaJuridicaRegistroDto dto)
         {
             using var connection = CreateConnection();
-            var rows = await connection.ExecuteAsync(
+            var parameters = new DynamicParameters();
+            parameters.Add("@IdEntidad", id);
+            parameters.Add("@NumeroDocumento", dto.NumeroDocumento);
+            parameters.Add("@RazonSocial", dto.RazonSocial);
+            parameters.Add("@Direccion", dto.Direccion);
+            parameters.Add("@TelefonosJson", dto.Telefonos != null && dto.Telefonos.Count > 0 
+                ? JsonSerializer.Serialize(dto.Telefonos) 
+                : null);
+
+            var resultado = await connection.ExecuteScalarAsync<int>(
                 "dbo.sp_ActualizarPersonaJuridica",
-                new
-                {
-                    IdEntidad = id,
-                    NumeroDocumento = dto.NumeroDocumento,
-                    RazonSocial = dto.RazonSocial,
-                    Direccion = dto.Direccion,
-                    TelefonosJson = JsonSerializer.Serialize(dto.Telefonos)
-                },
+                parameters,
                 commandType: CommandType.StoredProcedure
             );
-            return rows > 0;
+            return resultado > 0;
         }
 
         public async Task<bool> EliminarAsync(int id)
         {
             using var connection = CreateConnection();
-            var rows = await connection.ExecuteAsync(
+            var resultado = await connection.ExecuteScalarAsync<int>(
                 "dbo.sp_EliminarPersonaJuridica",
                 new { IdEntidad = id },
                 commandType: CommandType.StoredProcedure
             );
-            return rows > 0;
+            return resultado > 0;
         }
     }
 }
