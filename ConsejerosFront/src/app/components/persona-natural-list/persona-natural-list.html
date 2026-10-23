@@ -3,7 +3,7 @@
     <h5 class="m-0 font-weight-bold text-primary">
       <i class="bi bi-people-fill me-2"></i>Gestión de Personas Naturales
     </h5>
-    <button class="btn btn-primary btn-sm">
+    <button class="btn btn-primary btn-sm" (click)="abrirNuevo()">
       <i class="bi bi-person-plus-fill me-1"></i> Nueva Persona
     </button>
   </div>
@@ -52,7 +52,7 @@
               <small class="text-muted">{{ p.telefonosResumen || 'Sin teléfonos' }}</small>
             </td>
             <td class="text-center">
-              <button class="btn btn-outline-warning btn-sm me-1" title="Editar">
+              <button class="btn btn-outline-warning btn-sm me-1" title="Editar" (click)="abrirEditar(p.idEntidad)">
                 <i class="bi bi-pencil-square"></i>
               </button>
               <button class="btn btn-outline-danger btn-sm" title="Eliminar" (click)="eliminarPersona(p.idEntidad, p.nombreCompleto)">
@@ -71,3 +71,5 @@
     </div>
   </div>
 </div>
+
+<app-persona-natural-form #modalForm (guardadoExitoso)="cargarPersonas()"></app-persona-natural-form>

@@ -1,0 +1,121 @@
+<div class="modal fade show d-block" tabindex="-1" *ngIf="visible" style="background-color: rgba(0, 0, 0, 0.5);">
+  <div class="modal-dialog modal-lg modal-dialog-centered">
+    <div class="modal-content border-0 shadow">
+      
+      <div class="modal-header bg-primary text-white">
+        <h5 class="modal-title">
+          <i class="bi" [ngClass]="idEdicion ? 'bi-pencil-square' : 'bi-person-plus-fill'"></i>
+          {{ idEdicion ? 'Editar Persona Natural' : 'Nueva Persona Natural' }}
+        </h5>
+        <button type="button" class="btn-close btn-close-white" (click)="cerrarModal()" [disabled]="guardando"></button>
+      </div>
+
+      <div class="modal-body">
+        <div *ngIf="errorMensaje" class="alert alert-danger py-2">
+          <i class="bi bi-exclamation-circle me-1"></i> {{ errorMensaje }}
+        </div>
+
+        <div *ngIf="cargandoDatos" class="text-center py-4">
+          <div class="spinner-border text-primary" role="status"></div>
+          <p class="mt-2 text-muted">Cargando datos...</p>
+        </div>
+
+        <form [formGroup]="formulario" (ngSubmit)="guardar()" *ngIf="!cargandoDatos">
+          <div class="row g-3">
+            
+            <div class="col-md-4">
+              <label class="form-label">Tipo Documento</label>
+              <select class="form-select" formControlName="tipoDocumento">
+                <option value="DNI">DNI</option>
+                <option value="RUC">RUC</option>
+                <option value="CE">Carnet de Extranjería</option>
+              </select>
+            </div>
+
+            <div class="col-md-8">
+              <label class="form-label">Número de Documento</label>
+              <input type="text" class="form-control" formControlName="numeroDocumento"
+                [ngClass]="{'is-invalid': formulario.get('numeroDocumento')?.touched && formulario.get('numeroDocumento')?.invalid}">
+              <div class="invalid-feedback">Ingrese un número de documento válido.</div>
+            </div>
+
+            <div class="col-md-12">
+              <label class="form-label">Nombres</label>
+              <input type="text" class="form-control" formControlName="nombres"
+                [ngClass]="{'is-invalid': formulario.get('nombres')?.touched && formulario.get('nombres')?.invalid}">
+              <div class="invalid-feedback">Los nombres son obligatorios.</div>
+            </div>
+
+            <div class="col-md-6">
+              <label class="form-label">Apellido Paterno</label>
+              <input type="text" class="form-control" formControlName="apellidoPaterno"
+                [ngClass]="{'is-invalid': formulario.get('apellidoPaterno')?.touched && formulario.get('apellidoPaterno')?.invalid}">
+              <div class="invalid-feedback">El apellido paterno es obligatorio.</div>
+            </div>
+
+            <div class="col-md-6">
+              <label class="form-label">Apellido Materno</label>
+              <input type="text" class="form-control" formControlName="apellidoMaterno"
+                [ngClass]="{'is-invalid': formulario.get('apellidoMaterno')?.touched && formulario.get('apellidoMaterno')?.invalid}">
+              <div class="invalid-feedback">El apellido materno es obligatorio.</div>
+            </div>
+
+            <div class="col-md-6">
+              <label class="form-label">Fecha de Nacimiento</label>
+              <input type="date" class="form-control" formControlName="fechaNacimiento"
+                [ngClass]="{'is-invalid': formulario.get('fechaNacimiento')?.touched && formulario.get('fechaNacimiento')?.invalid}">
+              <div class="invalid-feedback">La fecha de nacimiento es obligatoria.</div>
+            </div>
+
+            <div class="col-md-6">
+              <label class="form-label">Sexo</label>
+              <select class="form-select" formControlName="sexo">
+                <option value="M">Masculino</option>
+                <option value="F">Femenino</option>
+              </select>
+            </div>
+
+            <div class="col-12 mt-4">
+              <div class="d-flex justify-content-between align-items-center mb-2">
+                <h6 class="m-0 text-secondary"><i class="bi bi-telephone-fill me-1"></i> Teléfonos de Contacto</h6>
+                <button type="button" class="btn btn-outline-success btn-sm" (click)="agregarTelefono()">
+                  <i class="bi bi-plus-circle me-1"></i> Agregar Teléfono
+                </button>
+              </div>
+
+              <div formArrayName="telefonos">
+                <div *ngFor="let tel of telefonos.controls; let i = index" [formGroupName]="i" class="row g-2 mb-2 align-items-center">
+                  <div class="col-md-5">
+                    <input type="text" class="form-control form-control-sm" placeholder="Número (ej: 987654321)" formControlName="numero">
+                  </div>
+                  <div class="col-md-5">
+                    <select class="form-select form-select-sm" formControlName="tipo">
+                      <option value="Móvil">Móvil</option>
+                      <option value="Fijo">Fijo</option>
+                      <option value="Trabajo">Trabajo</option>
+                    </select>
+                  </div>
+                  <div class="col-md-2 text-end">
+                    <button type="button" class="btn btn-outline-danger btn-sm" (click)="removerTelefono(i)" [disabled]="telefonos.length === 1">
+                      <i class="bi bi-trash"></i>
+                    </button>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+          </div>
+
+          <div class="modal-footer px-0 pb-0 mt-4">
+            <button type="button" class="btn btn-secondary" (click)="cerrarModal()" [disabled]="guardando">Cancelar</button>
+            <button type="submit" class="btn btn-primary" [disabled]="guardando">
+              <span *ngIf="guardando" class="spinner-border spinner-border-sm me-1"></span>
+              {{ guardando ? 'Guardando...' : 'Guardar' }}
+            </button>
+          </div>
+        </form>
+      </div>
+
+    </div>
+  </div>
+</div>
