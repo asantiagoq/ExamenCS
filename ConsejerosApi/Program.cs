@@ -19,6 +19,7 @@ builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
 
 builder.Services.AddScoped<IPersonaNaturalRepository, PersonaNaturalRepository>();
+builder.Services.AddScoped<IPersonaJuridicaRepository, PersonaJuridicaRepository>();
 
 var app = builder.Build();
 
