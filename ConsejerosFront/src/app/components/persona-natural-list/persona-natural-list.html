@@ -1,19 +1,42 @@
 <div class="card shadow-sm border-0">
   <div class="card-header bg-white py-3 d-flex justify-content-between align-items-center">
     <h5 class="m-0 font-weight-bold text-primary">
-      <i class="bi bi-people-fill me-2"></i>Gestión de Personas Naturales
+      <i class="bi bi-buildings-fill me-2"></i>Gestión de Entidades
     </h5>
-    <button class="btn btn-primary btn-sm" (click)="abrirNuevo()">
-      <i class="bi bi-person-plus-fill me-1"></i> Nueva Persona
-    </button>
+
+    <!-- Botón dinámico según la pestaña activa -->
+    <div>
+      <button *ngIf="tabActiva === 'natural'" class="btn btn-primary btn-sm" (click)="abrirNuevoNatural()">
+        <i class="bi bi-person-plus-fill me-1"></i> Nueva Persona Natural
+      </button>
+      <button *ngIf="tabActiva === 'juridica'" class="btn btn-dark btn-sm" (click)="abrirNuevoJuridica()">
+        <i class="bi bi-building-add me-1"></i> Nueva Persona Jurídica
+      </button>
+    </div>
   </div>
 
   <div class="card-body">
+    <!-- Pestañas de navegación -->
+    <ul class="nav nav-tabs mb-3">
+      <li class="nav-item">
+        <button class="nav-link" [ngClass]="{'active fw-bold': tabActiva === 'natural'}" (click)="cambiarTab('natural')">
+          <i class="bi bi-person me-1"></i> Personas Naturales
+        </button>
+      </li>
+      <li class="nav-item">
+        <button class="nav-link" [ngClass]="{'active fw-bold': tabActiva === 'juridica'}" (click)="cambiarTab('juridica')">
+          <i class="bi bi-building me-1"></i> Personas Jurídicas
+        </button>
+      </li>
+    </ul>
+
+    <!-- Mensaje de error general -->
     <div *ngIf="errorMensaje" class="alert alert-danger d-flex align-items-center" role="alert">
       <i class="bi bi-exclamation-triangle-fill me-2"></i>
       <div>{{ errorMensaje }}</div>
     </div>
 
+    <!-- Indicador de carga -->
     <div *ngIf="cargando" class="text-center py-4">
       <div class="spinner-border text-primary" role="status">
         <span class="visually-hidden">Cargando...</span>
@@ -21,7 +44,8 @@
       <p class="mt-2 text-muted">Cargando registros...</p>
     </div>
 
-    <div *ngIf="!cargando && !errorMensaje" class="table-responsive">
+    <!-- TABLA 1: PERSONAS NATURALES -->
+    <div *ngIf="!cargando && !errorMensaje && tabActiva === 'natural'" class="table-responsive">
       <table class="table table-hover align-middle table-striped">
         <thead class="table-light">
           <tr>
@@ -35,7 +59,7 @@
           </tr>
         </thead>
         <tbody>
-          <tr *ngFor="let p of personas">
+          <tr *ngFor="let p of personasNaturales">
             <td>
               <span class="badge bg-secondary me-1">{{ p.tipoDocumento }}</span>
               <strong>{{ p.numeroDocumento }}</strong>
@@ -52,15 +76,15 @@
               <small class="text-muted">{{ p.telefonosResumen || 'Sin teléfonos' }}</small>
             </td>
             <td class="text-center">
-              <button class="btn btn-outline-warning btn-sm me-1" title="Editar" (click)="abrirEditar(p.idEntidad)">
+              <button class="btn btn-outline-warning btn-sm me-1" title="Editar" (click)="abrirEditarNatural(p.idEntidad)">
                 <i class="bi bi-pencil-square"></i>
               </button>
-              <button class="btn btn-outline-danger btn-sm" title="Eliminar" (click)="eliminarPersona(p.idEntidad, p.nombreCompleto)">
+              <button class="btn btn-outline-danger btn-sm" title="Eliminar" (click)="eliminarPersonaNatural(p.idEntidad, p.nombreCompleto)">
                 <i class="bi bi-trash-fill"></i>
               </button>
             </td>
           </tr>
-          <tr *ngIf="personas.length === 0">
+          <tr *ngIf="personasNaturales.length === 0">
             <td colspan="7" class="text-center py-4 text-muted">
               <i class="bi bi-inbox fs-3 d-block mb-1"></i>
               No hay personas naturales registradas actualmente.
@@ -69,7 +93,54 @@
         </tbody>
       </table>
     </div>
+
+    <!-- TABLA 2: PERSONAS JURÍDICAS -->
+    <div *ngIf="!cargando && !errorMensaje && tabActiva === 'juridica'" class="table-responsive">
+      <table class="table table-hover align-middle table-striped">
+        <thead class="table-light">
+          <tr>
+            <th>Documento</th>
+            <th>Razón Social</th>
+            <th>Dirección</th>
+            <th>Fecha Registro</th>
+            <th>Teléfonos</th>
+            <th class="text-center">Acciones</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr *ngFor="let j of personasJuridicas">
+            <td>
+              <span class="badge bg-dark me-1">{{ j.tipoDocumento }}</span>
+              <strong>{{ j.numeroDocumento }}</strong>
+            </td>
+            <td><strong>{{ j.razonSocial }}</strong></td>
+            <td>{{ j.direccion || '-' }}</td>
+            <td>{{ j.fechaRegistro | date:'dd/MM/yyyy' }}</td>
+            <td>
+              <small class="text-muted">{{ j.telefonosResumen || 'Sin teléfonos' }}</small>
+            </td>
+            <td class="text-center">
+              <button class="btn btn-outline-warning btn-sm me-1" title="Editar" (click)="abrirEditarJuridica(j.idEntidad)">
+                <i class="bi bi-pencil-square"></i>
+              </button>
+              <button class="btn btn-outline-danger btn-sm" title="Eliminar" (click)="eliminarPersonaJuridica(j.idEntidad, j.razonSocial)">
+                <i class="bi bi-trash-fill"></i>
+              </button>
+            </td>
+          </tr>
+          <tr *ngIf="personasJuridicas.length === 0">
+            <td colspan="6" class="text-center py-4 text-muted">
+              <i class="bi bi-building-slash fs-3 d-block mb-1"></i>
+              No hay personas jurídicas registradas actualmente.
+            </td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+
   </div>
 </div>
 
-<app-persona-natural-form #modalForm (guardadoExitoso)="cargarPersonas()"></app-persona-natural-form>
+<!-- Modales de ambos tipos conectados a sus métodos de recarga -->
+<app-persona-natural-form #modalNatural (guardadoExitoso)="cargarPersonasNaturales()"></app-persona-natural-form>
+<app-persona-juridica-form #modalJuridica (guardadoExitoso)="cargarPersonasJuridicas()"></app-persona-juridica-form>
